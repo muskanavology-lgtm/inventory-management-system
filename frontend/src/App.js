@@ -14,17 +14,11 @@ function App() {
   });
   const [editingId, setEditingId] = useState(null);
 
-  // 1. Fetch Items with Safe Checks
   const fetchItems = async () => {
     try {
       const res = await axios.get(API_URL);
-      // Fallback check: Agar res.data.data ho ya direct res.data array ho
-      if (res.data && res.data.success && Array.isArray(res.data.data)) {
+      if (res.data.success) {
         setItems(res.data.data);
-      } else if (Array.isArray(res.data)) {
-        setItems(res.data);
-      } else {
-        setItems([]);
       }
     } catch (err) {
       console.error('Error fetching items:', err);
@@ -38,35 +32,34 @@ function App() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const cleanPrice = Number(String(formData.price).replace(/,/g, ''));
+  const cleanQuantity = Number(String(formData.quantity).replace(/,/g, ''));
 
-  // 2. Submit Form (Create / Update)
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Clean numbers safely
-    const cleanPrice = Number(formData.price);
-    const cleanQuantity = Number(formData.quantity);
-
-    const payload = {
-      name: formData.name,
-      quantity: cleanQuantity,
-      price: cleanPrice,
-      category: formData.category
-    };
-
-    try {
-      if (editingId) {
-        await axios.put(`${API_URL}/${editingId}`, payload);
-        setEditingId(null);
-      } else {
-        await axios.post(API_URL, payload);
-      }
-      setFormData({ name: '', quantity: '', price: '', category: '' });
-      fetchItems(); // Refresh inventory after change
-    } catch (err) {
-      console.error('Error submitting form:', err.response ? err.response.data : err.message);
+  try {
+    if (editingId) {
+      const res = await axios.put(`${API_URL}/${editingId}`, {
+        name: formData.name,
+        quantity: cleanQuantity,
+        price: cleanPrice,
+        category: formData.category
+      });
+      if (res.data.success) setEditingId(null);
+    } else {
+      await axios.post(API_URL, {
+        name: formData.name,
+        quantity: cleanQuantity,
+        price: cleanPrice,
+        category: formData.category
+      });
     }
-  };
+    setFormData({ name: '', quantity: '', price: '', category: '' });
+    fetchItems();
+  } catch (err) {
+    console.error('Error submitting form:', err);
+  }
+};
 
   const handleEdit = (item) => {
     setEditingId(item._id);
@@ -157,7 +150,7 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(items) && items.length > 0 ? (
+          {items.length > 0 ? (
             items.map((item) => (
               <tr key={item._id} className={item.quantity < 5 ? 'low-stock' : ''}>
                 <td>{item.name}</td>
