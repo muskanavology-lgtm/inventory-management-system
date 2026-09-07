@@ -1,18 +1,13 @@
 name: Daily Auto Commit at 2:40 PM IST
-
 on:
   schedule:
-    # 9:10 AM UTC = 2:40 PM IST
-    - cron: '10 9 * * *'
+   - cron: '30 9 * * *'
   workflow_dispatch:
-
 jobs:
   daily-commit:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -20,7 +15,6 @@ jobs:
       - name: Update Daily Log File
         run: |
           echo "Automated Daily Activity Log - $(date)" >> daily-activity.log
-
       - name: Commit and Push Changes
         run: |
           git config --global user.name "GitHub Actions Bot"
