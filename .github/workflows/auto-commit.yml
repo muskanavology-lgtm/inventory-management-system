@@ -1,8 +1,8 @@
-name: Daily Auto Commit at 5:10 PM IST
+name: Daily Auto Commit at 5:20 PM IST
 
 on:
   schedule:
-    - cron: '40 11 * * *'
+    - cron: '50 11 * * *'
   workflow_dispatch:
 
 jobs:
@@ -16,12 +16,14 @@ jobs:
 
       - name: Update Daily Log File
         run: |
-          echo "Automated Daily Activity Log - $(date)" >> daily-activity.log
+          echo "Automated Daily Commit - $(date)" >> daily-activity.log
+          echo "Time: $(date +'%Y-%m-%d %H:%M:%S')" >> daily-activity.log
+          echo "---" >> daily-activity.log
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add daily-activity.log
-          git commit -m "chore(auto): daily scheduled update at 5:10 PM IST [$(date +'%Y-%m-%d')]" || echo "No changes to commit"
+          git commit -m "chore(auto): daily scheduled update at 5:20 PM IST [$(date +'%Y-%m-%d %H:%M:%S')]" || echo "No changes to commit"
           git push
